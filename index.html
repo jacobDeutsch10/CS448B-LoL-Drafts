@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Draft Dashboard</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/d3-collection.v1.min.js"></script>    
+    <script src="https://cdn.jsdelivr.net/npm/d3-selection@3"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.js" integrity="sha512-jaNmuLbHtQ1ND+i63wVvwBd9T2hB3gTnk3x0Pp5R+AJwDdyzMe3t0vQqwUSoI9a/Ol1nscGV/1et4zSwL0P3AA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>  
+    <link rel="stylesheet" type="text/css" href="./styles.css">
+    <link rel="stylesheet" href="//rawgithub.com/Caged/d3-tip/master/examples/example-styles.css">
+    
+  </head>
+    <!--<div id="top-bar">
+      <div id="champion-options"></div>
+      <div id="matchup-stats-filters">
+        <div id="bar-filters"></div>
+        <div id="ot-filters">
+          <select id="ot-y-select"></select>
+        </div>
+
+      </div>-->
+    </div>
+    <div id="draft-stat-container">
+        <div id="draft-container">
+            <div class="team-container", id="blue-team-container" side="Blue"></div>
+            <div id="champion-container"></div>
+            <div class="team-container", id="red-team-container" side="Red"></div>
+             </div>
+        <div id="matchup-container">
+            <div class="matchup-stats", id="top-stats"></div>
+            <div class="matchup-stats", id="jng-stats"></div>
+            <div class="matchup-stats", id="mid-stats"></div>
+            <div class="matchup-stats", id="bot-stats"></div>
+            <div class="matchup-stats", id="sup-stats"></div>
+        </div>
+    </div>
+    <div id="draft-inspector">
+      <div id="draft-inspector-options">
+        <div class="dropdown-container" id="x-axis-dropdown-container">
+            <p>X-Axis:</p>
+            <select id="x-axis-dropdown"></select>
+        </div>
+        
+        <div class="dropdown-container" id="y-axis-dropdown-container">
+            <p>Y-Axis:</p>
+            <select id="y-axis-dropdown"></select>
+        </div>
+        <div class="draft-inspector-filters">
+          <div class="champion-dropdown-container" id="champ1-dropdown-container">
+            <p>Champion 1:</p>
+            <select class='dropdown', id="champ1-dropdown"></select>
+          </div>
+          <div class="radio-container" id="radio-side1">
+            <div class='radio-option'>
+              <input type="radio" id="champ1-blue" name="champ1-side" value="Blue" checked>
+              <label for="champ1-blue">Blue</label>
+            </div>
+            <div class='radio-option'>
+              <input type="radio" id="champ1-red" name="champ1-side" value="Red">
+              <label for="champ1-red">Red</label>
+            </div>
+            <div class='radio-option'>
+              <input type="radio" id="champ1-either" name="champ1-side" value="Either">
+              <label for="champ1-either">Either</label>
+            </div>
+          </div>
+      </div>
+        <div class="draft-inspector-filters">
+          <div class="champion-dropdown-container" id="champ2-dropdown-container">
+            <p>Champion 2:</p>
+            <select class='dropdown', id="champ2-dropdown"></select>
+          </div>
+          <div class="radio-container" id="radio-side2">
+            <div class='radio-option'>
+              <input type="radio" id="champ2-blue" name="champ2-side" value="Blue">
+              <label for="champ2-blue">Blue</label>
+            </div>
+            <div class='radio-option'>
+              <input type="radio" id="champ2-red" name="champ2-side" value="Red" checked>
+              <label for="champ2-red">Red</label>
+            </div>
+            <div class='radio-option'>
+              <input type="radio" id="champ2-either" name="champ2-side" value="Either">
+              <label for="champ2-either">Either</label>
+            </div>
+          </div>
+        </div> 
+      </div>
+      
+      <div id="draft-inspector-graph"></div>
+    </div>
+
+   
+    
+  <body>
+    <script src="src/data.js" defer></script>
+    <script src="src/portraits.js" defer></script>
+    <!--<script type="module" src="./index.js"></script>*/ -->
+    <script src="src/champions.js" defer></script>
+    <script src="src/matchups.js" defer></script>
+    <script src="src/inspector.js" defer></script>
+    
+  </body>
+</html>
