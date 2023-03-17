@@ -1,9 +1,9 @@
 
 function blue_side_winrate(data, role){
     const data_filt = filter_on_champs(data, role, true);
-    return d3.mean(
+    return [d3.mean(
         data_filt,
-        d=> +d[`result_Blue`]);
+        d=> +d[`result_Blue_${role}`]), data_filt.length];
 }
 function filter_on_champs(data, role, side_specific){
     var data_filt = null
@@ -26,36 +26,36 @@ function filter_on_champs(data, role, side_specific){
     return data_filt
     
 }
-function check_role_side_specific(d, zip, stat){
+function check_role_side_specific(d, zip, stats){
     return zip.map(
         function(x){
             if (x[2] == 'Either'){
                 if (d[`champion_Red_${x[1]}`] === x[0]){
-                    return [true, d[`${stat}_Red_${x[1]}`]];
+                    return [true, stats.map(stat => +d[`${stat}_Red_${x[1]}`])];
                 }
                 else if((d[`champion_Blue_${x[1]}`] === x[0])){
-                    return [true, d[`${stat}_Blue_${x[1]}`]];
+                    return [true, stats.map(stat => +d[`${stat}_Blue_${x[1]}`])];
                 }
                 else{
                     return[false, null];
                 }
             }
             else{
-                return [d[`champion_${x[2]}_${x[1]}`] === x[0], d[`${stat}_${x[2]}_${x[1]}`]];
+                return [d[`champion_${x[2]}_${x[1]}`] === x[0], stats.map(stat=> +d[`${stat}_${x[2]}_${x[1]}`])];
             }
             
         } 
         
     );
 }
-function check_role_specific(d, zip, stat){
+function check_role_specific(d, zip, stats){
     return zip.map(
         function (x){
             if (d[`champion_Red_${x[1]}`] === x[0]){
-                return [true, d[`${stat}_Red_${x[1]}`]];
+                return [true, stats.map(stat => +d[`${stat}_Red_${x[1]}`])];
             }
             else if((d[`champion_Blue_${x[1]}`] === x[0])){
-                return [true, d[`${stat}_Blue_${x[1]}`]];
+                return [true,  stats.map(stat => +d[`${stat}_Blue_${x[1]}`])];
             }
             else{
                 return[false, null]
@@ -64,15 +64,16 @@ function check_role_specific(d, zip, stat){
         } 
     );
 }
-function reduce_data(data, stat, champs, roles, sides, side_specific){
+
+function reduce_data(data, stats, champs, roles, sides, side_specific){
     var data_reduced = null;
     var valid_indices = [];
     var curr_index = 0;
     if (side_specific){
         let zip = champs.map((x, i) => [x, roles[i], sides[i]])
-        
+        console.log(zip)
         data_reduced = data.reduce(function(filtered, d) {
-            let result = check_role_side_specific(d, zip, stat)
+            let result = check_role_side_specific(d, zip, stats);
             
             if (result.every(x=>x[0])) {
                 var stat_info = {
@@ -91,7 +92,7 @@ function reduce_data(data, stat, champs, roles, sides, side_specific){
     else{
         let zip = champs.map((x, i) => [x, roles[i]])
         data_reduced = data.reduce(function(filtered, d) {
-            let result = check_role_specific(d, zip, stat)
+            let result = check_role_specific(d, zip, stats)
             if (result.every(x=>x[0])) {
                 var stat_info = {
                     patch: d.patch,
@@ -108,7 +109,7 @@ function reduce_data(data, stat, champs, roles, sides, side_specific){
     return [data_reduced, valid_indices];
 
 }
-function head_to_head_bar(blue_wr, role){
+function head_to_head_bar(blue_wr, count, role){
     const selection = d3.selectAll(".matchup-stats")
     .filter(
         function(){
@@ -118,7 +119,7 @@ function head_to_head_bar(blue_wr, role){
     selection
     .select('.wr-bar-svg')
     .remove();
-
+    
     selection
         .append('svg')
         .attr('class', 'wr-bar-svg')
@@ -129,13 +130,63 @@ function head_to_head_bar(blue_wr, role){
         .attr('class', 'winrate-bars')
 
     const wr_bars = selection.select('.winrate-bars');
+    var champs = [matchups['Red'][role], matchups['Blue'][role]];
+    let urlr = champData.reduce((a, c, i/*Current index*/) => {
+        if (c.name == champs[0]) a.push(c.url); //Add the found index.
+        return a;
+      }, []/*Accumulator to store the found indexes.*/)[0];
+    
+    let urlb = champData.reduce((a, c,) => {
+        if (c.name == champs[1]) a.push(c.url); 
+        return a;
+      }, [])[0];
+    
+    var tip_r = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .direction('s')
+        .html(function(d, i) {
 
+            return "<strong>All Time Head-To-Head</strong>"+ 
+            "<div style='display:flex; flex-direction:row; align-items:center;'><img  src='"+ 
+            urlr + "'style='width: 50px; height: 50px; border: 5px solid #ff6666;'><strong>V.S.</strong><img  src='"+ 
+            urlb + "'style='width: 50px; height: 50px; border: 5px solid steelblue;'></div>" + 
+            "<strong>Record:</strong> <span style='color:red'>" + 
+            Math.round((1-blue_wr)*count)+ "-" +
+            Math.round(blue_wr*count) + 
+            "</span><br>"+
+            "<strong>Winrate:</strong> <span style='color:red'>" + 
+            Math.round((1-blue_wr)*100) + "%"+
+            "</span>";
+        });
+    var tip_b = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .direction('s')
+        .html(function(d, i) {
+
+            return "<strong>All Time Head-To-Head</strong>"+
+            "<div style='display:flex; flex-direction:row; align-items:center;'><img  src='"+ 
+            urlb + "'style='width: 50px; height: 50px; border: 5px solid steelblue;'><strong>V.S.</strong><img  src='"+ 
+            urlr + "'style='width: 50px; height: 50px; border: 5px solid #ff6666;'></div>" + 
+            "<strong>Record:</strong> <span style='color:red'>" + 
+            Math.round(blue_wr*count)+ "-" +
+            Math.round((1-blue_wr)*count) + 
+            "</span><br>"+
+            "<strong>Winrate:</strong> <span style='color:red'>" + 
+            Math.round(blue_wr*100) + "%"+
+            "</span>";
+        });
+    wr_bars.call(tip_r);
+    wr_bars.call(tip_b);
     wr_bars.append('rect')
         .attr('x', 0)
         .attr('y', "20%")
         .attr('width', blue_wr * 100 + '%')
         .attr('height', '50%')
         .style('fill', 'steelblue')
+        .on("mouseover",function(event, d) { tip_b.show(d, this);})
+        .on("mouseout", function(event, d) { tip_b.hide(d, this);});
 
     wr_bars.append('rect')
         .attr('x', blue_wr * 100 + '%')
@@ -143,6 +194,8 @@ function head_to_head_bar(blue_wr, role){
         .attr('width', (1 - blue_wr) * 100 + '%')
         .attr('height', '50%')
         .style('fill', "#ff6666")
+        .on("mouseover",function(event, d) { tip_r.show(d, this);})
+        .on("mouseout", function(event, d) { tip_r.hide(d, this);});
 
     wr_bars.append('text')
         .text((blue_wr*100).toFixed(1) + "%")
@@ -151,7 +204,9 @@ function head_to_head_bar(blue_wr, role){
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'middle')
         .style('fill', 'white')
-        .style('font-size', '16px');
+        .style('font-size', '16px')
+        .on("mouseover",function(event, d) { tip_b.show(d, this);})
+        .on("mouseout", function(event, d) { tip_b.hide(d, this);});
     
     wr_bars.append('text')
         .text(((1 - blue_wr)*100).toFixed()+"%")
@@ -160,12 +215,13 @@ function head_to_head_bar(blue_wr, role){
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'middle')
         .style('fill', 'white')
-        .style('font-size', '16px');
+        .style('font-size', '16px')
+        .on("mouseover",function(event, d) { tip_r.show(d, this);})
+        .on("mouseout", function(event, d) { tip_r.hide(d, this);});
 }
 
 
 function head_to_head_over_time(data, role){
-    console.log(reduce_data(df, 'csdiffat15', ['Aatrox', 'Akali'], ['top', 'top'], [], false));
     const selection = d3.selectAll(".matchup-stats")
     .filter(
         function(){
@@ -176,13 +232,15 @@ function head_to_head_over_time(data, role){
 
     bs_wr_by_year = d3.rollup(
         filter_on_champs(data, role),
-        v => d3.mean(v, d=> +d[`result_Blue`]),
+        v => [
+            d3.mean(v, d=> +d[`result_Blue_${role}`]),
+            v.length
+        ],
         d=>d.year
     )
-    console.log(bs_wr_by_year)
     var margin = {top: 10, right: 30, bottom: 20, left: 50},
     width = 400 - margin.left - margin.right,
-    height = 95 - margin.top - margin.bottom;
+    height = 90 - margin.top - margin.bottom;
     selection
     .select('.wr-ot')
     .remove();
@@ -209,26 +267,78 @@ function head_to_head_over_time(data, role){
       var y = d3.scaleLinear()
         .domain([0, 1])
         .range([ height, 0 ]);
-    svg.append("g")
-    .call(d3.axisLeft(y).ticks(5));
+    var champs = [matchups['Red'][role], matchups['Blue'][role]];
+    let urlr = champData.reduce((a, c, i/*Current index*/) => {
+        if (c.name == champs[0]) a.push(c.url); //Add the found index.
+        return a;
+        }, []/*Accumulator to store the found indexes.*/)[0];
+    
+    let urlb = champData.reduce((a, c,) => {
+        if (c.name == champs[1]) a.push(c.url); 
+        return a;
+        }, [])[0];
+    var tip_r = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .direction('s')
+        .html(function(d, i) {
+            count = bs_wr_by_year.get(d)[1];
+            blue_wr = bs_wr_by_year.get(d)[0];
+            return `<strong>${d} Head-To-Head</strong>`+ 
+            "<div style='display:flex; flex-direction:row; align-items:center;'><img  src='"+ 
+            urlr + "'style='width: 50px; height: 50px; border: 5px solid #ff6666;'><strong>V.S.</strong><img  src='"+ 
+            urlb + "'style='width: 50px; height: 50px; border: 5px solid steelblue;'></div>" + 
+            "<strong>Record:</strong> <span style='color:red'>" + 
+            Math.round((1-blue_wr)*count)+ "-" +
+            Math.round(blue_wr*count) + 
+            "</span><br>"+
+            "<strong>Winrate:</strong> <span style='color:red'>" + 
+            Math.round((1-blue_wr)*100) + "%"+
+            "</span>";
+        });
+    var tip_b = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .direction('s')
+        .html(function(d, i) {
+            count = bs_wr_by_year.get(d)[1];
+            blue_wr = bs_wr_by_year.get(d)[0];
+            return `<strong>${d} Head-To-Head</strong>`+ 
+            "<div style='display:flex; flex-direction:row; align-items:center;'><img  src='"+ 
+            urlb + "'style='width: 50px; height: 50px; border: 5px solid steelblue;'><strong>V.S.</strong><img  src='"+ 
+            urlr + "'style='width: 50px; height: 50px; border: 5px solid #ff6666;'></div>" + 
+            "<strong>Record:</strong> <span style='color:red'>" + 
+            Math.round(blue_wr*count)+ "-" +
+            Math.round((1-blue_wr)*count) + 
+            "</span><br>"+
+            "<strong>Winrate:</strong> <span style='color:red'>" + 
+            Math.round(blue_wr*100) + "%"+
+            "</span>";
+        });
+    svg.call(tip_r);
+    svg.call(tip_b);
+    //svg.append("g")
+    ///.call(d3.axisLeft(y).ticks(4));
     svg.selectAll("bluebar")
-    // Enter in the stack data = loop key per key = group per group
     .data(bs_wr_by_year.keys())
     .enter()
     .append("rect")
     .attr("x", function(d) { return x(d); })
-    .attr("y", function(d) { return y(bs_wr_by_year.get(d)); })
-    .attr("height",function(d) { return height - y(bs_wr_by_year.get(d));})
+    .attr("y", function(d) { return y(bs_wr_by_year.get(d)[0]); })
+    .attr("height",function(d) { return height - y(bs_wr_by_year.get(d)[0]);})
     .attr("width",x.bandwidth())
     .attr("fill", 'steelblue')
+    .on("mouseover",function(event, d) { tip_b.show(d, this);})
+    .on("mouseout", function(event, d) { tip_b.hide(d, this);});
     svg.selectAll("redbar")
-    // Enter in the stack data = loop key per key = group per group
     .data(bs_wr_by_year.keys())
     .enter()
     .append("rect")
     .attr("x", function(d) { return x(d); })
     .attr("y", function(d) { return y(1)})
-    .attr("height",function(d) { return height -y(1-bs_wr_by_year.get(d));})
+    .attr("height",function(d) { return height -y(1-bs_wr_by_year.get(d)[0]);})
     .attr("width",x.bandwidth())
     .attr("fill", "#ff6666")
+    .on("mouseover",function(event, d) { tip_r.show(d, this);})
+        .on("mouseout", function(event, d) { tip_r.hide(d, this);});
 }

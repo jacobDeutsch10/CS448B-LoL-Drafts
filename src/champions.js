@@ -45,7 +45,7 @@ const championsData = d3.csv('./data/champ_links.csv').then(function(champions) 
                         df, 
                         selectedRole);
                     console.log(wr)
-                    head_to_head_bar(wr, selectedRole)
+                    head_to_head_bar(wr[0], wr[1], selectedRole)
                     head_to_head_over_time(df, selectedRole)
                 }
                 update_inspector_champion_dropdowns();  

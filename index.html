@@ -6,19 +6,13 @@
     <script src="https://d3js.org/d3-collection.v1.min.js"></script>    
     <script src="https://cdn.jsdelivr.net/npm/d3-selection@3"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.js" integrity="sha512-jaNmuLbHtQ1ND+i63wVvwBd9T2hB3gTnk3x0Pp5R+AJwDdyzMe3t0vQqwUSoI9a/Ol1nscGV/1et4zSwL0P3AA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>  
+    <script src="https://cdn.jsdelivr.net/npm/d3-color@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-interpolate@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-scale-chromatic@3"></script>
     <link rel="stylesheet" type="text/css" href="./styles.css">
     <link rel="stylesheet" href="//rawgithub.com/Caged/d3-tip/master/examples/example-styles.css">
     
   </head>
-    <!--<div id="top-bar">
-      <div id="champion-options"></div>
-      <div id="matchup-stats-filters">
-        <div id="bar-filters"></div>
-        <div id="ot-filters">
-          <select id="ot-y-select"></select>
-        </div>
-
-      </div>-->
     </div>
     <div id="draft-stat-container">
         <div id="draft-container">
@@ -84,11 +78,30 @@
               <label for="champ2-either">Either</label>
             </div>
           </div>
-        </div> 
+        </div>
+        <div class="draft-inspector-bins">
+          <label> Bins</label>
+          <input type="range" id="bins-slider" min="2" max="15" value="10" oninput="this.nextElementSibling.value = this.value">
+          <output>10</output> 
+        </div>
+        
       </div>
       
       <div id="draft-inspector-graph"></div>
+      <div id="top-bar">
+        <div id="title-text">LOL Esports Draft Dashboard</div>
+        <div id="explanation-text">
+            This is a draft dashboard for League of Legends Esports. The data comes courtesy of Oracle's Elixir's public Lol Esports dataset.
+            To get started, select champions for each role on the blue and red team. As champion matchups are populated win rates in those matchups
+            as well as winrates by year will be shown to the right of the draft dashboard. Select statistics to plot on the X and Y axes as well as champions to plot stats for.
+            If year or patch is selected in for the x-axis, the draft dashboard will show the y-axis stat with respect to the year/patch for each champion in the selected matchup.
+            If another stat is selected for the x-axis, the draft dashboard will show the y-axis stat with respect to the selected stat for champion 1 in the selected matchup 
+            with the size and color of the dots corresponding to the number of occurences and winrate respectively.
+        </div>
+        </div>
+
     </div>
+    
 
    
     
