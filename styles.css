@@ -148,6 +148,17 @@ p{
   margin-left: 1%;
   margin-top: 0.2%;
   width: 100%;
+  height: 60%;
+}
+#links{
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  font-weight: 200;
+  color: white;
+  margin-left: 1%;
+  margin-top: 0.2%;
+  width: 100%;
+  height: 20%;
 }
 #champion-options{
   width:900px
