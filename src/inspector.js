@@ -1,4 +1,5 @@
 function reduce_data_and_rollup(dataframe, stats, champs, roles, sides, x_type){
+    // helper function to grab necessary data
     var data = reduce_data(dataframe, stats, champs, roles, sides, true);
     // if data
     const data_roll = d3.rollup(
@@ -13,19 +14,7 @@ function reduce_data_and_rollup(dataframe, stats, champs, roles, sides, x_type){
     )
     return [data_roll, data_roll_count];
 }
-/*// Define the binning function
-var bins = d3.histogram()
-    .value(function(d) { return d.x; }) // Use the x value for binning
-    .thresholds(5) // Set the number of bins to 5
-    (data);
 
-// Define the mean calculation function
-var means = bins.map(function(bin) {
-  return {
-    x: bin.x0 + (bin.x1 - bin.x0) / 2, // Use the middle x value of the bin
-    y: d3.mean(bin, function(d) { return d.y; }) // Calculate the mean of the y values in the bin
-  };
-});*/
 function update_scatter(){
     var x_type = d3.select('#x-axis-dropdown').property('value');
     var y_type = d3.select('#y-axis-dropdown').property('value');
@@ -74,7 +63,7 @@ function update_scatter(){
     .thresholds(d3.select('#bins-slider').property('value')) 
     (data);
 
-    // Define the mean calculation function
+
     var means = bins.map(function(bin) {
         return {
             x: bin.x0 + (bin.x1 - bin.x0) / 2, // Use the middle x value of the bin
@@ -108,11 +97,13 @@ function update_scatter(){
     var rad = d3.scaleLog()
         .domain([d3.min(means, d=>d.count), d3.max(means, d=>d.count)])
         .range([7, 15]);
+
+
     // color scale for winrate
+    // couldnt find a code example that works for this
     color = d=>d3.interpolateTurbo(d);
         
   
-    //color = d=>d3.interpolateTurbo(d);
     svg.append("g")
         .attr("transform", "translate(0," + (height + 4) + ")")
         .call(d3.axisBottom(x))
@@ -222,15 +213,15 @@ function update_plot_time(){
     var data_c1_other_roll_count = data_c1_other[1];
     var data_c2_other_roll = data_c2_other[0];
     var data_c2_other_roll_count = data_c2_other[1];
-    let url1 = champData.reduce((a, c, i/*Current index*/) => {
-        if (c.name == champs[0]) a.push(c.url); //Add the found index.
+    let url1 = champData.reduce((a, c, i) => {
+        if (c.name == champs[0]) a.push(c.url); 
         return a;
-      }, []/*Accumulator to store the found indexes.*/)[0];
+      }, [])[0];
     
-    let url2 = champData.reduce((a, c, i/*Current index*/) => {
-        if (c.name == champs[1]) a.push(c.url); //Add the found index.
+    let url2 = champData.reduce((a, c, i) => {
+        if (c.name == champs[1]) a.push(c.url); 
         return a;
-      }, []/*Accumulator to store the found indexes.*/)[0];
+      }, [])[0];
     
     var margin = {top: 40, right: 200, bottom: 100, left: 100},
         width = 1100 - margin.left - margin.right,
@@ -259,12 +250,10 @@ function update_plot_time(){
     .attr("dy", ".15em")
     .attr("transform", "rotate(-65)");
 
-    // Add Y axis
-    // find min and max of data_roll and data_c1_other_roll and data_c2_other_roll
+
 
     var data_roll_max = d3.max(data_roll.keys(), function(d) { return Math.max(...[data_roll.get(d)[0][0], data_roll.get(d)[1][0]]); })
     var data_roll_min = d3.min(data_roll.keys(), function(d) { return Math.min(...[data_roll.get(d)[0][0], data_roll.get(d)[1][0]]); })
-    //var data_c1_other_roll_max = d3.max(data_roll.keys(), function(d) { console.log(data_c1_other_roll.get(d));return Math.max(...[data_c1_other_roll.get(d)[0][0], data_c1_other_roll.get(d)[1][0]]); })
     var data_c1_other_roll_max = d3.max(data_roll.keys(), function(d) { return data_c1_other_roll.get(d)[0][0]; })
     var data_c1_other_roll_min = d3.min(data_roll.keys(), function(d) { return data_c1_other_roll.get(d)[0][0]; })
     var data_c2_other_roll_max = d3.max(data_roll.keys(), function(d) { return data_c2_other_roll.get(d)[0][0]; })
@@ -315,7 +304,7 @@ function update_plot_time(){
     .y(function(d) { return y(data_roll.get(d)[0][0]) })
     )
 
-    // add a tooltip using d3tip library that shows the value of the line at that point and the number of occurences
+    // create a tooltip
     var tip1 = d3.tip()
     .attr('class', 'd3-tip')
     .offset([-10, 0])
@@ -626,30 +615,34 @@ const y_axis_options = [
 'visionscore',
 'xpat10'
 ];
-//uses d3 to create dropdown menus for x and y axis setting default values
+//create dropdown menus for x and y axis setting default values
 function create_dropdowns(){
     var x_axis_dropdown = d3.select('#x-axis-dropdown').attr('class', 'dropdown')
     var y_axis_dropdown = d3.select('#y-axis-dropdown').attr('class', 'dropdown')
+    // add options to dropdowns
     x_axis_dropdown.selectAll('Options')
     .data(x_axis_options)
     .enter()
     .append('option')
-    .text(function (d) { return d; }) // text showed in the menu
-    .attr("value", function (d) { return d; }) // corresponding value returned by the button
+    .text(function (d) { return d; }) 
+    .attr("value", function (d) { return d; })
+    // update the plot on change and set defaults 
     x_axis_dropdown.on("change", function(d) {
         update_plot()
-    }) //set default values 
+    }) 
     x_axis_dropdown.property('value', 'year')
     y_axis_dropdown.selectAll('Options')
     .data(y_axis_options)
     .enter()
     .append('option')
-    .text(function (d) { return d; }) // text showed in the menu
-    .attr("value", function (d) { return d; }) // corresponding value returned by the button
+    .text(function (d) { return d; })
+    .attr("value", function (d) { return d; }) 
     y_axis_dropdown.on("change", function(d) {
         update_plot()
     })
     y_axis_dropdown.property('value', 'kills')
+
+    // add event listeners
     d3.select('#champ1-dropdown').on("change", function(d) {
         update_plot()
     });

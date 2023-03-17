@@ -51,7 +51,6 @@ const championsData = d3.csv('./data/champ_links.csv').then(function(champions) 
                 update_inspector_champion_dropdowns();  
             }
         });
-    // Create container for the blue team
     
 });
 //updates the champion dropdowns in the inspector when a new champion is selected
